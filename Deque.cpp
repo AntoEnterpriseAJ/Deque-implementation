@@ -50,37 +50,6 @@ class Deque
 		backBlockIndex = frontBlockIndex + numberOfElements - 1;
 	}
 
-
-	void shrinkToFit()
-	{
-		int numberOfElements = backBlockIndex - frontBlockIndex + 1;
-		if (blocks.size() == 1)
-		{
-			return;
-		}
-		else if (blocks.size() > 8 && blocks.size() > 2 * numberOfElements)
-		{
-			int numberOfElements = backBlockIndex - frontBlockIndex + 1;
-			std::vector<Block*> temp(numberOfElements);
-			int index = 0;
-
-			for (int i = frontBlockIndex; i <= backBlockIndex; ++i)
-			{
-				temp[index++] = blocks[i];
-			}
-
-			blocks.clear();
-			blocks.resize(numberOfElements, nullptr);
-			for (int i = 0; i < temp.size(); ++i)
-			{
-				blocks[i] = temp[i];
-			}
-
-			frontBlockIndex = 0;
-			backBlockIndex = numberOfElements - 1;
-		}
-	}
-
 public:
 	Deque()
 		: frontBlockIndex{ 0 }, backBlockIndex{ 0 }, frontElementIndex{ -1 }, backElementIndex{ -1 }
@@ -178,7 +147,6 @@ public:
 			return;
 		}
 
-		shrinkToFit();
 		if (frontBlockIndex == backBlockIndex && frontElementIndex == backElementIndex) // it's the only element
 		{
 			/*debug:*/ std::cout << "poppedBack: " << blocks[backBlockIndex]->elements[backElementIndex] << '\n';
@@ -222,7 +190,6 @@ public:
 			return;
 		}
 
-		shrinkToFit();
 		if (frontBlockIndex == backBlockIndex && frontElementIndex == backElementIndex) //it's the only element
 		{
 			/*debug:*/ std::cout << "poppedFront: " << blocks[frontBlockIndex]->elements[frontElementIndex] << '\n';
