@@ -3,140 +3,142 @@
 
 template <typename T, int blockSize = 8>
 class Deque
-{
+{	
+private:
 	struct Block
 	{
 		T* elements = new T[blockSize];
 		bool used = false;
 	};
 
-	std::vector<Block*> blocks;
-	int frontBlockIndex;
-	int backBlockIndex;
-	int frontElementIndex;
-	int backElementIndex;
+	std::vector<Block*> m_blocks;
+	int m_frontBlockIndex;
+	int m_backBlockIndex;
+	int m_frontElementIndex;
+	int m_backElementIndex;
 	int m_size;
+
 
 	//we resize when we hit left/right bound in the blocks vector
 	void resizeBlocks()
 	{
 		int newSize;
-		if (blocks.size() == 1)
+		if (m_blocks.size() == 1)
 		{
 			newSize = 4;
 		}
 		else
 		{
-			newSize = blocks.size() * 2;
+			newSize = m_blocks.size() * 2;
 		}
 
-		int numberOfElements = backBlockIndex - frontBlockIndex + 1;
+		int numberOfElements = m_backBlockIndex - m_frontBlockIndex + 1;
 		std::vector<Block*> temp(numberOfElements);
 		int index = 0;
 
-		for (int i = frontBlockIndex; i <= backBlockIndex; ++i)
+		for (int i = m_frontBlockIndex; i <= m_backBlockIndex; ++i)
 		{
-			temp[index++] = blocks[i];
+			temp[index++] = m_blocks[i];
 		}
 
-		blocks.clear();
-		blocks.resize(newSize, nullptr);
+		m_blocks.clear();
+		m_blocks.resize(newSize, nullptr);
 		for (int i = 0; i < temp.size(); ++i)
 		{
-			blocks[(newSize - numberOfElements) / 2 + i] = temp[i];
+			m_blocks[(newSize - numberOfElements) / 2 + i] = temp[i];
 		}
 
-		frontBlockIndex = (newSize - numberOfElements) / 2;
-		backBlockIndex = frontBlockIndex + numberOfElements - 1;
+		m_frontBlockIndex = (newSize - numberOfElements) / 2;
+		m_backBlockIndex = m_frontBlockIndex + numberOfElements - 1;
 	}
 
 public:
 	Deque()
-		: frontBlockIndex{ 0 }, backBlockIndex{ 0 }, frontElementIndex{ -1 }, backElementIndex{ -1 }
+		: m_frontBlockIndex{ 0 }, m_backBlockIndex{ 0 }, m_frontElementIndex{ -1 }, m_backElementIndex{ -1 }
 	{
-		blocks.resize(1);
-		blocks[0] = new Block;
+		m_blocks.resize(1);
+		m_blocks[0] = new Block;
 	}
 
 	~Deque()
 	{
-		for (int i = frontBlockIndex; i < backBlockIndex; ++i)
+		for (int i = m_frontBlockIndex; i < m_backBlockIndex; ++i)
 		{
-			delete[] blocks[i];
+			delete[] m_blocks[i];
 		}
 	}
 
 	void push_front(T element)
 	{
-		if (frontElementIndex == -1) //first push
+		if (m_frontElementIndex == -1) //first push
 		{
-			frontElementIndex = blockSize - 1;
-			if (backElementIndex == -1)
+			m_frontElementIndex = blockSize - 1;
+			if (m_backElementIndex == -1)
 			{
-				backElementIndex = frontElementIndex;
+				m_backElementIndex = m_frontElementIndex;
 			}
 
-			blocks[frontBlockIndex]->elements[frontElementIndex] = element;
+			m_blocks[m_frontBlockIndex]->elements[m_frontElementIndex] = element;
 		}
-		else if (frontElementIndex == 0) //the block we are trying to push into is full
+		else if (m_frontElementIndex == 0) //the block we are trying to push into is full
 		{
-			if (frontBlockIndex > 0) //there's space left in the blocks vector
+			if (m_frontBlockIndex > 0) //there's space left in the blocks vector
 			{
-				blocks[--frontBlockIndex] = new Block;
-				frontElementIndex = blockSize - 1;
-				blocks[frontBlockIndex]->elements[frontElementIndex] = element;
+				m_blocks[--m_frontBlockIndex] = new Block;
+				m_frontElementIndex = blockSize - 1;
+				m_blocks[m_frontBlockIndex]->elements[m_frontElementIndex] = element;
 			}
 			else //no space left in the blocks vector, we resize
 			{
 				resizeBlocks();
-				frontElementIndex = blockSize - 1;
-				blocks[--frontBlockIndex] = new Block;
-				blocks[frontBlockIndex]->elements[frontElementIndex] = element;
+				m_frontElementIndex = blockSize - 1;
+				m_blocks[--m_frontBlockIndex] = new Block;
+				m_blocks[m_frontBlockIndex]->elements[m_frontElementIndex] = element;
 			}
 		}
 		else
 		{
-			frontElementIndex--;
-			blocks[frontBlockIndex]->elements[frontElementIndex] = element;
+			m_frontElementIndex--;
+			m_blocks[m_frontBlockIndex]->elements[m_frontElementIndex] = element;
 		}
 		m_size++;
-		blocks[frontBlockIndex]->used = true;
+		m_blocks[m_frontBlockIndex]->used = true;
 	}
 
 	void push_back(T element)
 	{
-		if (backElementIndex == -1) //first push
+		if (m_backElementIndex == -1) //first push
 		{
-			backElementIndex = 0;
-			if (frontElementIndex == -1)
+			m_backElementIndex = 0;
+			if (m_frontElementIndex == -1)
 			{
-				frontElementIndex = backElementIndex;
+				m_frontElementIndex = m_backElementIndex;
 			}
-			blocks[backBlockIndex]->elements[backElementIndex] = element;
+			m_blocks[m_backBlockIndex]->elements[m_backElementIndex] = element;
 		}
-		else if (backElementIndex == blockSize - 1) //the block we are trying to push into is full
+		else if (m_backElementIndex == blockSize - 1) //the block we are trying to push into is full
 		{
-			if (backBlockIndex < blocks.size() - 1) //there's space left in the blocks vector
+			if (m_backBlockIndex < m_blocks.size() - 1) //there's space left in the blocks vector
 			{
-				blocks[++backBlockIndex] = new Block;
-				backElementIndex = 0;
-				blocks[backBlockIndex]->elements[backElementIndex] = element;
+				m_blocks[++m_backBlockIndex] = new Block;
+				m_backElementIndex = 0;
+				m_blocks[m_backBlockIndex]->elements[m_backElementIndex] = element;
 			}
 			else //no space left in the blocks vector, we resize
 			{
 				resizeBlocks();
-				backElementIndex = 0;
-				blocks[++backBlockIndex] = new Block;
-				blocks[backBlockIndex]->elements[backElementIndex] = element;
+				m_backElementIndex = 0;
+				m_blocks[++m_backBlockIndex] = new Block;
+				m_blocks[m_backBlockIndex]->elements[m_backElementIndex] = element;
 			}
 		}
 		else
 		{
-			backElementIndex++;
-			blocks[backBlockIndex]->elements[backElementIndex] = element;
+			m_backElementIndex++;
+			m_blocks[m_backBlockIndex]->elements[m_backElementIndex] = element;
 		}
 		m_size++;
-		blocks[backBlockIndex]->used = true;
+		m_blocks[m_backBlockIndex]->used = true;
 	}
 
 	void pop_back()
@@ -147,35 +149,35 @@ public:
 			return;
 		}
 
-		if (frontBlockIndex == backBlockIndex && frontElementIndex == backElementIndex) // it's the only element
+		if (m_frontBlockIndex == m_backBlockIndex && m_frontElementIndex == m_backElementIndex) // it's the only element
 		{
-			/*debug:*/ std::cout << "poppedBack: " << blocks[backBlockIndex]->elements[backElementIndex] << '\n';
-			frontElementIndex = backElementIndex = -1;
+			/*debug:*/ std::cout << "poppedBack: " << m_blocks[m_backBlockIndex]->elements[m_backElementIndex] << '\n';
+			m_frontElementIndex = m_backElementIndex = -1;
 			m_size--;
 		}
-		else if (backElementIndex != -1)
+		else if (m_backElementIndex != -1)
 		{
-			/*debug:*/ std::cout << "poppedBack: " << blocks[backBlockIndex]->elements[backElementIndex] << '\n';
+			/*debug:*/ std::cout << "poppedBack: " << m_blocks[m_backBlockIndex]->elements[m_backElementIndex] << '\n';
 
-			if (backElementIndex == 0) //the only element in the block
+			if (m_backElementIndex == 0) //the only element in the block
 			{
-				int next = backBlockIndex + 1;
+				int next = m_backBlockIndex + 1;
 				//if there's an unused next block, we deallocate it
-				if (backBlockIndex < blocks.size() - 1 && blocks[next] != nullptr && blocks[next]->used == false)
+				if (m_backBlockIndex < m_blocks.size() - 1 && m_blocks[next] != nullptr && m_blocks[next]->used == false)
 				{
-					delete[] blocks[backBlockIndex + 1]->elements;
-					delete blocks[backBlockIndex + 1];
-					blocks[backBlockIndex + 1] == nullptr;
+					delete[] m_blocks[m_backBlockIndex + 1]->elements;
+					delete m_blocks[m_backBlockIndex + 1];
+					m_blocks[m_backBlockIndex + 1] == nullptr;
 				}
 
-				blocks[backBlockIndex]->used = false;
-				backBlockIndex--;
+				m_blocks[m_backBlockIndex]->used = false;
+				m_backBlockIndex--;
 
-				backElementIndex = blockSize - 1;
+				m_backElementIndex = blockSize - 1;
 			}
 			else
 			{
-				backElementIndex--;
+				m_backElementIndex--;
 			}
 			m_size--;
 		}
@@ -190,35 +192,35 @@ public:
 			return;
 		}
 
-		if (frontBlockIndex == backBlockIndex && frontElementIndex == backElementIndex) //it's the only element
+		if (m_frontBlockIndex == m_backBlockIndex && m_frontElementIndex == m_backElementIndex) //it's the only element
 		{
-			/*debug:*/ std::cout << "poppedFront: " << blocks[frontBlockIndex]->elements[frontElementIndex] << '\n';
-			frontElementIndex = backElementIndex = -1;
+			/*debug:*/ std::cout << "poppedFront: " << m_blocks[m_frontBlockIndex]->elements[m_frontElementIndex] << '\n';
+			m_frontElementIndex = m_backElementIndex = -1;
 			m_size--;
 		}
-		else if (frontElementIndex != -1)
+		else if (m_frontElementIndex != -1)
 		{
-			/*debug:*/ std::cout << "poppedFront: " << blocks[frontBlockIndex]->elements[frontElementIndex] << '\n';
+			/*debug:*/ std::cout << "poppedFront: " << m_blocks[m_frontBlockIndex]->elements[m_frontElementIndex] << '\n';
 
-			if (frontElementIndex == blockSize - 1) //the only element in the block
+			if (m_frontElementIndex == blockSize - 1) //the only element in the block
 			{
-				int prev = frontBlockIndex - 1;
+				int prev = m_frontBlockIndex - 1;
 				//if there's an unused previous block, we deallocate it
-				if (frontBlockIndex > 0 && blocks[prev] != nullptr && blocks[prev]->used == false)
+				if (m_frontBlockIndex > 0 && m_blocks[prev] != nullptr && m_blocks[prev]->used == false)
 				{
-					delete[] blocks[frontBlockIndex - 1]->elements;
-					delete blocks[frontBlockIndex - 1];
-					blocks[frontBlockIndex - 1] == nullptr;
+					delete[] m_blocks[m_frontBlockIndex - 1]->elements;
+					delete m_blocks[m_frontBlockIndex - 1];
+					m_blocks[m_frontBlockIndex - 1] == nullptr;
 				}
 
-				blocks[frontBlockIndex]->used = false;
-				frontBlockIndex++;
+				m_blocks[m_frontBlockIndex]->used = false;
+				m_frontBlockIndex++;
 
-				frontElementIndex = 0;
+				m_frontElementIndex = 0;
 			}
 			else
 			{
-				frontElementIndex++;
+				m_frontElementIndex++;
 			}
 			m_size--;
 		}
@@ -249,7 +251,7 @@ public:
 			}
 			(*this)[pos] = element;
 
-
+			//push the last element back
 			push_back(lastElement);
 		}
 	}
@@ -272,6 +274,7 @@ public:
 		}
 		else
 		{
+			//shift elements to the left
 			for (int i = pos; i < m_size - 1; ++i)
 			{
 				(*this)[i] = (*this)[i + 1];
@@ -282,27 +285,27 @@ public:
 
 	const T& front()
 	{
-		if (frontElementIndex != -1)
+		if (m_frontElementIndex != -1)
 		{
-			return blocks[frontBlockIndex]->elements[frontElementIndex];
+			return m_blocks[m_frontBlockIndex]->elements[m_frontElementIndex];
 		}
 		throw std::out_of_range("front: container is empty");
 	}
 
 	const T& back()
 	{
-		if (backElementIndex != -1)
+		if (m_backElementIndex != -1)
 		{
-			return blocks[backBlockIndex]->elements[backElementIndex];
+			return m_blocks[m_backBlockIndex]->elements[m_backElementIndex];
 		}
 		throw std::out_of_range("front: container is empty");
 	}
 
 	T& operator[](int index)
 	{
-		int elementIndex = (frontElementIndex + index) % blockSize;
-		int blockIndex = frontBlockIndex + (frontElementIndex + index) / blockSize;
-		return blocks[blockIndex]->elements[elementIndex];
+		int elementIndex = (m_frontElementIndex + index) % blockSize;
+		int blockIndex = m_frontBlockIndex + (m_frontElementIndex + index) / blockSize;
+		return m_blocks[blockIndex]->elements[elementIndex];
 	}
 
 	bool empty()
@@ -312,15 +315,15 @@ public:
 
 	void clear()
 	{
-		for (int i = frontBlockIndex; i < backBlockIndex; ++i)
+		for (int i = m_frontBlockIndex; i < m_backBlockIndex; ++i)
 		{
-			delete[] blocks[i];
+			delete[] m_blocks[i];
 		}
-		blocks.clear();
-		blocks.resize(1);
-		blocks[0] = new Block;
-		frontBlockIndex = backBlockIndex = 0;
-		frontElementIndex = backElementIndex = -1;
+		m_blocks.clear();
+		m_blocks.resize(1);
+		m_blocks[0] = new Block;
+		m_frontBlockIndex = m_backBlockIndex = 0;
+		m_frontElementIndex = m_backElementIndex = -1;
 		m_size = 0;
 	}
 
