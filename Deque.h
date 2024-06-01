@@ -4,24 +4,10 @@
 template <typename T, int blockSize = 8>
 class Deque
 {
-private:
-    struct Block
-    {
-        T* elements = new T[blockSize];
-        bool used = false;
-    };
-
-    std::vector<Block*> m_blocks;
-    int m_frontBlockIndex;
-    int m_backBlockIndex;
-    int m_frontElementIndex;
-    int m_backElementIndex;
-    int m_size;
-
-    void resizeBlocks();
-
 public:
     Deque();
+    Deque(const Deque& other);
+    Deque& operator=(const Deque& other);
     ~Deque();
 
     void push_front(T element);
@@ -30,13 +16,29 @@ public:
     void pop_front();
     void insert(T element, int pos);
     void deleteAtPos(int pos);
-    const T& front();
-    const T& back();
+    const T& front() const;
+    const T& back() const;
     T& operator[](int index);
-    bool empty();
+    bool empty() const;
     void clear();
     void print();
-    int size();
+    int size() const;
+
+private:
+    struct Block
+    {
+        T* elements = new T[blockSize];
+        bool used = false;
+    };
+
+    void resizeBlocks();
+
+    std::vector<Block*> m_blocks;
+    int m_frontBlockIndex;
+    int m_backBlockIndex;
+    int m_frontElementIndex;
+    int m_backElementIndex;
+    int m_size;
 };
 
 template <typename T, int blockSize>
@@ -45,6 +47,72 @@ Deque<T, blockSize>::Deque()
 {
     m_blocks.resize(1);
     m_blocks[0] = new Block;
+}
+
+template<typename T, int blockSize>
+Deque<T, blockSize>::Deque(const Deque& other)
+{
+	m_blocks.resize(other.m_blocks.size());
+    for (int i = 0; i < other.m_blocks.size(); ++i)
+    {
+        if (other.m_blocks[i] != nullptr && other.m_blocks[i]->used)
+        {
+			m_blocks[i] = new Block;
+            for (int j = 0; j < blockSize; ++j)
+            {
+				m_blocks[i]->elements[j] = other.m_blocks[i]->elements[j];
+			}
+			m_blocks[i]->used = true;
+		}
+        else
+        {
+			m_blocks[i] = nullptr;
+		}
+	}
+
+	m_frontBlockIndex = other.m_frontBlockIndex;
+	m_backBlockIndex = other.m_backBlockIndex;
+	m_frontElementIndex = other.m_frontElementIndex;
+	m_backElementIndex = other.m_backElementIndex;
+	m_size = other.m_size;
+}
+
+template<typename T, int blockSize>
+Deque<T, blockSize>& Deque<T, blockSize>::operator=(const Deque& other)
+{
+    if (this != &other)
+    {
+        for (int i = 0; i < m_blocks.size(); ++i)
+        {
+            delete[] m_blocks[i];
+        }
+
+        m_blocks.resize(other.m_blocks.size());
+        for (int i = 0; i < m_blocks.size(); ++i)
+        {
+            if (other.m_blocks[i] != nullptr && other.m_blocks[i]->used)
+            {
+                m_blocks[i] = new Block;
+                for (int j = 0; j < blockSize; ++j)
+                {
+                    m_blocks[i]->elements[j] = other.m_blocks[i]->elements[j];
+                }
+                m_blocks[i]->used = true;
+            }
+            else
+            {
+				m_blocks[i] = nullptr;
+			}
+        }
+
+        m_frontBlockIndex = other.m_frontBlockIndex;
+        m_backBlockIndex = other.m_backBlockIndex;
+        m_frontElementIndex = other.m_frontElementIndex;
+        m_backElementIndex = other.m_backElementIndex;
+        m_size = other.m_size;
+    }
+
+    return *this;
 }
 
 template <typename T, int blockSize>
@@ -310,7 +378,7 @@ void Deque<T, blockSize>::deleteAtPos(int pos)
 }
 
 template <typename T, int blockSize>
-const T& Deque<T, blockSize>::front()
+const T& Deque<T, blockSize>::front() const
 {
     if (m_frontElementIndex != -1)
     {
@@ -320,7 +388,7 @@ const T& Deque<T, blockSize>::front()
 }
 
 template <typename T, int blockSize>
-const T& Deque<T, blockSize>::back()
+const T& Deque<T, blockSize>::back() const
 {
     if (m_backElementIndex != -1)
     {
@@ -338,7 +406,7 @@ T& Deque<T, blockSize>::operator[](int index)
 }
 
 template <typename T, int blockSize>
-bool Deque<T, blockSize>::empty()
+bool Deque<T, blockSize>::empty() const
 {
     return m_size == 0;
 }
@@ -369,7 +437,7 @@ void Deque<T, blockSize>::print()
 }
 
 template <typename T, int blockSize>
-int Deque<T, blockSize>::size()
+int Deque<T, blockSize>::size() const
 {
     return m_size;
 }
