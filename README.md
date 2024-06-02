@@ -4,6 +4,8 @@
 
 This project is an implementation of a double-ended queue (deque) in C++. The deque is a dynamic data structure that allows insertion and deletion of elements from both ends efficiently. This implementation starts with a single block of memory containing 8 elements and dynamically allocates new blocks as needed. When two successive blocks become empty, the furthest one is deallocated.
 
+![Deque](https://github.com/AntoEnterpriseAJ/Deque-implementation/assets/152036671/e6add70b-5539-4e94-8b48-de2c0b4cd460)
+
 ## Features
 
 - **Dynamic Memory Allocation:** The deque starts with a single block of 8 elements and dynamically resizes by adding new blocks when needed. After resizing, elements are recentered in the vector of blocks to maintain balance.
