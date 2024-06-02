@@ -5,24 +5,25 @@ template <typename T, int blockSize = 8>
 class Deque
 {
 public:
+    void push_front(const T& element);
+    void push_back(const T& element);
+    void pop_back();
+    void pop_front();
+    void insert(const T& element, int pos);
+    T& operator[](int index);
+    void deleteAtPos(int pos);
+    void clear();
+    void print();
+
+    const T& front() const;
+    const T& back() const;
+    bool empty() const;
+    int size() const;
+
     Deque();
     Deque(const Deque& other);
     Deque& operator=(const Deque& other);
     ~Deque();
-
-    void push_front(T element);
-    void push_back(T element);
-    void pop_back();
-    void pop_front();
-    void insert(T element, int pos);
-    void deleteAtPos(int pos);
-    const T& front() const;
-    const T& back() const;
-    T& operator[](int index);
-    bool empty() const;
-    void clear();
-    void print();
-    int size() const;
 
 private:
     struct Block
@@ -158,7 +159,7 @@ void Deque<T, blockSize>::resizeBlocks()
 }
 
 template <typename T, int blockSize>
-void Deque<T, blockSize>::push_front(T element)
+void Deque<T, blockSize>::push_front(const T& element)
 {
     if (m_frontElementIndex == -1) //first push
     {
@@ -196,7 +197,7 @@ void Deque<T, blockSize>::push_front(T element)
 }
 
 template <typename T, int blockSize>
-void Deque<T, blockSize>::push_back(T element)
+void Deque<T, blockSize>::push_back(const T& element)
 {
     if (m_backElementIndex == -1) //first push
     {
@@ -319,7 +320,7 @@ void Deque<T, blockSize>::pop_front()
 }
 
 template <typename T, int blockSize>
-void Deque<T, blockSize>::insert(T element, int pos)
+void Deque<T, blockSize>::insert(const T& element, int pos)
 {
     if (pos < 0 || pos > m_size)
     {
